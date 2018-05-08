@@ -8,6 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(ddalpha)
+library(ggplot2)
 ```
 
 
@@ -24,4 +25,14 @@ Somit muss die Klassifikation zu einem Faktor übersetzt werden.
 ```{r set_factor}
 banknoten$falsch <- as.factor(banknoten$falsch)
 plot(banknoten, col = banknoten$falsch)
+```
+Länge: Länge der Banknote
+Links: Höhe der Banknote bei der linken Seite
+Rechts: Höhe der Banknote bei der rechten Seite
+Oben: Distanz zwischen inneren Bereich und oberen Rand
+Unten: Distanz zwischen inneren Bereich und unteren Rand
+Diagonal: Diagonale Länge der Banknote
+
+
+```{r asdf}
 ```
