@@ -1,0 +1,27 @@
+---
+title: "Banknoten"
+author: "JoKeYa"
+date: "08/05/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ddalpha)
+```
+
+
+## Setup
+Als Library wurde ddalpha verwendet.
+Als Datenset verwenden wir Banknoten.
+```{r get_data}
+data("banknoten")
+plot(banknoten, col = banknoten$falsch)
+```
+
+Da die Klassifikation ein Integer ist, kann es wie oben vorkommen, dass der Wert nicht korrekt interpretiert werden kann.
+Somit muss die Klassifikation zu einem Faktor übersetzt werden.
+```{r set_factor}
+banknoten$falsch <- as.factor(banknoten$falsch)
+plot(banknoten, col = banknoten$falsch)
+```
