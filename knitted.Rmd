@@ -12,6 +12,7 @@ library(ggplot2)
 library(randomForest)
 library(caret)
 library(pROC)
+library(mlbench)
 
 ##In der eigenen Umgebung benötigt man:
 #install.packages("ddalpha")
@@ -199,3 +200,25 @@ Wie oben zu sehen ist, wird entsprechend der Importance-Tabelle grafisch ersicht
 Wenn die ROC näher an der blauen Ideallinie ist, desto besser konnte es von den Desicion Trees korrekt identifiziert werden.
 
 Dementsprechend ist beim oberen der beiden ROC die Fehlerrate höher, da weniger genau geschätzt werden kann, bzw. weniger Werte korrekt eingeschätzt werden können
+
+
+###MeanDecreaseGini
+
+Gini-Wichtigkeit oder mittlere Verringerung der Verunreinigung (MDI) berechnet jede Merkmalsbedeutung als die Summe �ber die Anzahl von Teilungen (�ber alle B�ume hinweg), die das Merkmal enthalten, proportional zu der Anzahl von Samples, die es aufteilt.
+Ein kleinerer Gini-WErt bedeutet eine "reinerer/besserer" Ansatz die Daten optimal zu teilen.
+Das MDI Model nimmt immer den besten/reinsten Datensatz
+
+###Variable Importance
+```{r Variable Importance}
+control <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+
+model <- train(falsch~.,data = banknoten, method="lvq", preProcess="scale",trControl=control)
+
+
+importance <- varImp(model, scale=FALSE)
+
+print(importance)
+
+plot(importance)
+```
+
