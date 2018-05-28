@@ -205,20 +205,17 @@ Dementsprechend ist beim oberen der beiden ROC die Fehlerrate hÃ¶her, da weniger
 ###MeanDecreaseGini
 
 Gini-Wichtigkeit oder mittlere Verringerung der Verunreinigung (MDI) berechnet jede Merkmalsbedeutung als die Summe über die Anzahl von Teilungen (über alle Bäume hinweg), die das Merkmal enthalten, proportional zu der Anzahl von Samples, die es aufteilt.
-Ein kleinerer Gini-WErt bedeutet eine "reinerer/besserer" Ansatz die Daten optimal zu teilen.
+Ein kleinerer Gini-Wert bedeutet eine "reinerer/besserer" Ansatz die Daten optimal zu teilen.
 Das MDI Model nimmt immer den besten/reinsten Datensatz
 
 ###Variable Importance
 ```{r Variable Importance}
 control <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
 
-model <- train(falsch~.,data = banknoten, method="lvq", preProcess="scale",trControl=control)
+banknoten.rf <- randomForest(falsch ~ ., data = banknoten, ntree=1000, keep.forest=FALSE, importance=TRUE)
 
+varImp(banknoten.rf)
 
-importance <- varImp(model, scale=FALSE)
-
-print(importance)
-
-plot(importance)
+varImpPlot(banknoten.rf)
 ```
 
