@@ -14,7 +14,7 @@ library(caret)
 library(pROC)
 library(mlbench)
 
-##In der eigenen Umgebung benötigt man:
+##In der eigenen Umgebung benÃ¶tigt man:
 #install.packages("ddalpha")
 #install.packages("ggplot2")
 #install.packages("randomForest")
@@ -33,17 +33,17 @@ plot(banknoten, col = banknoten$falsch)
 ```
 
 Da die Klassifikation ein Integer ist, kann es wie oben vorkommen, dass der Wert nicht korrekt interpretiert werden kann.
-Somit muss die Klassifikation zu einem Faktor übersetzt werden.
+Somit muss die Klassifikation zu einem Faktor Ã¼bersetzt werden.
 ```{r set_factor}
 banknoten$faktor <- as.factor(banknoten$falsch)
 plot(banknoten, col = banknoten$faktor)
 ```
-Länge: Länge der Banknote
-Links: Höhe der Banknote bei der linken Seite
-Rechts: Höhe der Banknote bei der rechten Seite
+LÃ¤nge: LÃ¤nge der Banknote
+Links: HÃ¶he der Banknote bei der linken Seite
+Rechts: HÃ¶he der Banknote bei der rechten Seite
 Oben: Distanz zwischen inneren Bereich und oberen Rand
 Unten: Distanz zwischen inneren Bereich und unteren Rand
-Diagonal: Diagonale Länge der Banknote
+Diagonal: Diagonale LÃ¤nge der Banknote
 
 ## Load and visualise the data 
 
@@ -51,7 +51,7 @@ Diagonal: Diagonale Länge der Banknote
 ```{r banknoten}
 head(banknoten)
 
-##Für ROC beibehalten (Ist leider nicht ganz perfekt 1, aber dient zur Anschauung)
+##FÃ¼r ROC beibehalten (Ist leider nicht ganz perfekt 1, aber dient zur Anschauung)
 beispielRoc <- roc(banknoten$falsch, banknoten$diagonal)
 
 str(banknoten)
@@ -86,7 +86,7 @@ I plot the data for the predictor Petal.Length as an example.
 And I add the information for the mean (red line), the median (green line) and 25% / 75% quantile (blue and yellow line) in the same plot
 
 
-Banknoten$falsch wird nicht mehr benötigt und kann die Statistik über den Haufen werfne.
+Banknoten$falsch wird nicht mehr benÃ¶tigt und kann die Statistik Ã¼ber den Haufen werfne.
 Somit wurde es meinerseits entfernt.
 ```{r removeFalsch}
 
@@ -119,7 +119,7 @@ ggplot(banknoten, aes(x=diagonal, colour=faktor, fill=faktor)) +
 #set.seed to ensure reproducability
 
 
-#Entfernen der Daten, damit Prediktor nicht 100% zurückgibt. -- START
+#Entfernen der Daten, damit Prediktor nicht 100% zurÃ¼ckgibt. -- START
 banknoten$diagonal = NULL
 banknoten$unten = NULL
 banknoten$rechts = NULL
@@ -138,7 +138,7 @@ ggplot(banknoten, aes(x=links, colour=faktor, fill=faktor)) +
   xlab("Diagonale") +  
   ylab("Faktor") +
   theme(legend.position="none")
-#Entfernen der Daten, damit Prediktor nicht 100% zurückgibt. -- ENDE
+#Entfernen der Daten, damit Prediktor nicht 100% zurÃ¼ckgibt. -- ENDE
 
 set.seed(13) 
 trainIndex <- createDataPartition(banknoten$faktor, p = .6, 
@@ -162,18 +162,18 @@ importance(model)
 Use the model to make a prediction on the test set 
 ```{r randoForest_predict}
 testSet$prediction <- predict(model, testSet[,1:3])
-#[,1:7] wieder setzen, wenn die 4 Eigenschaften für Prädiktor wieder "eingeschalten" werden.
+#[,1:7] wieder setzen, wenn die 4 Eigenschaften fÃ¼r PrÃ¤diktor wieder "eingeschalten" werden.
 head(testSet)
 
 ```
 
-##Confusion matrix
+## Confusion matrix
 Die Konfusions-Matrix stellt, wie bekannt, die True Positives, False Positives, True Negatives und False Negatives.
 
-###Specifity
+### Specifity
 True Negatives durch alle wahren Negativen, die vorhanden sind
 
-###Sensitivity
+### Sensitivity
 True Positives durch alle wahren Positiven, die vorhanden sind
 ```{r confusion matrix}
 
@@ -189,26 +189,26 @@ lines(beispielRoc, col="blue")
 
 ```
 
-###ROC Curve
-(Die blaue Linie ist leider nicht perfekt auf 1, jedoch dient sie gut zur Veranschauung, was optimal wäre.)
+### ROC Curve
+(Die blaue Linie ist leider nicht perfekt auf 1, jedoch dient sie gut zur Veranschauung, was optimal wÃ¤re.)
 
 
-Eine ROC Curve stellt für EINE dieser Werte seine entsprechende Kurve dar, wie gut diese klassifiziert werden kann.
+Eine ROC Curve stellt fÃ¼r EINE dieser Werte seine entsprechende Kurve dar, wie gut diese klassifiziert werden kann.
 
 
-Wie oben zu sehen ist, wird entsprechend der Importance-Tabelle grafisch ersichtlich, dass "Links" bessere Werte liefern kann, denn die AUC (Area Under the Curve) is grösser, bzw. werden weniger werte falsch eingestuft.
-Wenn die ROC näher an der blauen Ideallinie ist, desto besser konnte es von den Desicion Trees korrekt identifiziert werden.
+Wie oben zu sehen ist, wird entsprechend der Importance-Tabelle grafisch ersichtlich, dass "Links" bessere Werte liefern kann, denn die AUC (Area Under the Curve) is grÃ¶sser, bzw. werden weniger werte falsch eingestuft.
+Wenn die ROC nÃ¤her an der blauen Ideallinie ist, desto besser konnte es von den Desicion Trees korrekt identifiziert werden.
 
-Dementsprechend ist beim oberen der beiden ROC die Fehlerrate höher, da weniger genau geschätzt werden kann, bzw. weniger Werte korrekt eingeschätzt werden können
+Dementsprechend ist beim oberen der beiden ROC die Fehlerrate hÃ¶her, da weniger genau geschÃ¤tzt werden kann, bzw. weniger Werte korrekt eingeschÃ¤tzt werden kÃ¶nnen
 
 
-###MeanDecreaseGini
+### MeanDecreaseGini
 
-Gini-Wichtigkeit oder mittlere Verringerung der Verunreinigung (MDI) berechnet jede Merkmalsbedeutung als die Summe �ber die Anzahl von Teilungen (�ber alle B�ume hinweg), die das Merkmal enthalten, proportional zu der Anzahl von Samples, die es aufteilt.
+Gini-Wichtigkeit oder mittlere Verringerung der Verunreinigung (MDI) berechnet jede Merkmalsbedeutung als die Summe über die Anzahl von Teilungen (über alle Bäume hinweg), die das Merkmal enthalten, proportional zu der Anzahl von Samples, die es aufteilt.
 Ein kleinerer Gini-Wert bedeutet eine "reinerer/besserer" Ansatz die Daten optimal zu teilen.
 Das MDI Model nimmt immer den besten/reinsten Datensatz
 
-###Variable Importance
+### Variable Importance
 ```{r Variable Importance}
 control <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
 
@@ -219,3 +219,6 @@ varImp(banknoten.rf)
 varImpPlot(banknoten.rf)
 ```
 
+## Out-of-Bag Error
+
+Zu Beginn teilt man das Dataset in Trainings-Daten und Test-Daten auf. Mit den Trainings-Daten wird der Algorithmus trainiert. Wird nun der trainierte Algorithmus auf die Test-Daten angewendet, so erhalten wir eine mögliche Fehlerrate bei der Kategorisierung. Diese Fehlerrate nennt man Out-of-Bag Error, und ist eine Schätzung wie genau der Algorithmus ist.
