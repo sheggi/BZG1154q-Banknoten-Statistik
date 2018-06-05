@@ -1,7 +1,7 @@
 ---
 title: "Banknoten"
 author: "JoKeYa"
-date: "08/05/2018"
+date: "05/06/2018"
 output: html_document
 ---
 
@@ -211,7 +211,7 @@ Das MDI Model nimmt immer den besten/reinsten Datensatz
 ### Variable Importance
 ```{r Variable Importance}
 control <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
-
+data("banknoten") #Fix, damit wieder originale Daten vorkommen
 banknoten.rf <- randomForest(falsch ~ ., data = banknoten, ntree=1000, keep.forest=FALSE, importance=TRUE)
 
 varImp(banknoten.rf)
