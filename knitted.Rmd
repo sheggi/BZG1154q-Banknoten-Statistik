@@ -1,7 +1,7 @@
 ---
 title: "Banknoten"
 author: "JoKeYa"
-date: "05/06/2018"
+date: "11/06/2018"
 output: html_document
 ---
 
@@ -20,7 +20,7 @@ library(mlbench)
 #install.packages("randomForest")
 #install.packages("pROC")
 #install.packages("e1071")
-#library(mlbench)
+#install.packages("mlbench")
 ```
 
 
@@ -29,7 +29,6 @@ Als Library wurde ddalpha verwendet.
 Als Datenset verwenden wir Banknoten.
 ```{r get_data}
 data("banknoten")
-data("iris")
 plot(banknoten, col = banknoten$falsch)
 ```
 
@@ -39,16 +38,21 @@ Somit muss die Klassifikation zu einem Faktor übersetzt werden.
 banknoten$faktor <- as.factor(banknoten$falsch)
 plot(banknoten, col = banknoten$faktor)
 ```
+
 Länge: Länge der Banknote
+
 Links: Höhe der Banknote bei der linken Seite
+
 Rechts: Höhe der Banknote bei der rechten Seite
+
 Oben: Distanz zwischen inneren Bereich und oberen Rand
+
 Unten: Distanz zwischen inneren Bereich und unteren Rand
+
 Diagonal: Diagonale Länge der Banknote
 
-## Load and visualise the data 
 
-
+## Visualisierung bestehender Daten
 ```{r banknoten}
 head(banknoten)
 
@@ -56,16 +60,6 @@ head(banknoten)
 beispielRoc <- roc(banknoten$falsch, banknoten$diagonal)
 
 str(banknoten)
-
-```
-
-Get help from google to understand what is meant by sepal/petal length and width. 
-
-An excellent introduction in plotting data using iris data 
-is available on the site: 
-https://www.kaggle.com/antoniolopez/iris-data-visualization-with-r
-
-```{r means, quantils etc}
 
 colMeans(banknoten[,1:7])
 
@@ -77,26 +71,20 @@ median(banknoten$oben)
 median(banknoten$diagonal)
 median(banknoten$falsch)
 
-
-# The following command will give the 25% Quantile for Sepal.Length
 quantile(banknoten$diagonal, 0.25)
-
 ```
 
-I plot the data for the predictor Petal.Length as an example.
-And I add the information for the mean (red line), the median (green line) and 25% / 75% quantile (blue and yellow line) in the same plot
-
-
-Banknoten$falsch wird nicht mehr benötigt und kann die Statistik über den Haufen werfne.
-Somit wurde es meinerseits entfernt.
+Banknoten$falsch wird nicht mehr benötigt und kann die Statistik über den Haufen werfen.
+Somit wurde es anbei entfernt.
 ```{r removeFalsch}
-
 banknoten$falsch = NULL
-
 ```
 
-```{r, plot faktor}
+## Definierung der Daten
+Bildlich dargestellt wird anbei die Diagonale des Datensets geplottet mit der Unterscheidung von dem Faktor.
 
+Man sieht sehr gut, dass die Daten fast perfekt voneinander getrennt werden können und dementsprechend die Decision Trees ein perfektes Ergebnis eruieren können.
+```{r, plot faktor}
 ggplot(banknoten, aes(x=diagonal, colour=faktor, fill=faktor)) +
   geom_density(alpha=.3) +
   geom_vline(aes(xintercept=mean(diagonal,
@@ -110,17 +98,24 @@ ggplot(banknoten, aes(x=diagonal, colour=faktor, fill=faktor)) +
   xlab("Links") +  
   ylab("Menge") +
   theme(legend.position="none")
-  
 ```
 
+Deswegen haben wir uns entschieden die "besten" Datensätze zu entfernen, damit wir überhaupt Fehlerquellen erhalten.
 
-## Partition the data in training and test sets
+### Wichtigkeit der Variablen (MeanDecreaseGini)
+```{r MeanDecreaseGini}
+control <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+banknoten.rf <- randomForest(faktor ~ ., data = banknoten, ntree=1000, keep.forest=FALSE, importance=TRUE)
 
-```{r partition}
-#set.seed to ensure reproducability
+varImp(banknoten.rf)
+varImpPlot(banknoten.rf)
+```
 
+Da diagonal, Unten, Rechts und Oben die wichtigsten 4 Datensätze sind, werden sie entfernt.
 
-#Entfernen der Daten, damit Prediktor nicht 100% zurückgibt. -- START
+Jetzt ist es nicht mehr so eindeutig, bzw. sind die wahren von den falschen Werten weniger gut zu unterscheiden.
+
+```{r plot faktor 2}
 banknoten$diagonal = NULL
 banknoten$unten = NULL
 banknoten$rechts = NULL
@@ -136,90 +131,58 @@ ggplot(banknoten, aes(x=links, colour=faktor, fill=faktor)) +
                  colour=faktor), color="blue", size=1) +
   geom_vline(aes(xintercept=quantile(links, 0.75),
                  colour=faktor), color="yellow", size=1) +
-  xlab("Diagonale") +  
+  xlab("Links") +  
   ylab("Faktor") +
   theme(legend.position="none")
-#Entfernen der Daten, damit Prediktor nicht 100% zurückgibt. -- ENDE
+```
 
+## Erstellung des Training- und Testsets
+Der ganze Bestand wird in die zwei Sets eingeteilt und das Trainingset erhält bereits via RandomForest seine Prädiktion erhalten.
+
+Die zwei Spalten sind nun dmentsprechend mehr Wert als vorhin.
+```{r raining- and teststet}
 set.seed(13) 
 trainIndex <- createDataPartition(banknoten$faktor, p = .6, 
                                   list = FALSE, times = 1)
 
 trainSet <- banknoten[trainIndex, ]
 testSet <- banknoten[-trainIndex,]
-```
-
-Make the model and look at the result
-```{r randomForest_model}
-
 
 model <- randomForest(formula = faktor ~ ., data = banknoten)
 
-model
+testSet$prediction <- predict(model, testSet[,1:3])
 
 importance(model)
 ```
 
-Use the model to make a prediction on the test set 
-```{r randoForest_predict}
-testSet$prediction <- predict(model, testSet[,1:3])
-#[,1:7] wieder setzen, wenn die 4 Eigenschaften für Prädiktor wieder "eingeschalten" werden.
-head(testSet)
-
-```
-
-## Confusion matrix
+### Confusion matrix
 Die Konfusions-Matrix stellt, wie bekannt, die True Positives, False Positives, True Negatives und False Negatives.
 
-### Specifity
+#### Specifity
 True Negatives durch alle wahren Negativen, die vorhanden sind
 
-### Sensitivity
+#### Sensitivity
 True Positives durch alle wahren Positiven, die vorhanden sind
 ```{r confusion matrix}
-
 confusionMatrix(testSet$prediction, testSet$faktor)
-
-plot(roc(testSet$prediction, testSet$laenge), print.auc=TRUE)
-lines(beispielRoc, col="blue")
-
-plot(roc(testSet$prediction, testSet$links), print.auc=TRUE)
-lines(beispielRoc, col="blue")
-#auc(testSet$prediction, testSet$links)
-
-
 ```
 
 ### ROC Curve
 (Die blaue Linie ist leider nicht perfekt auf 1, jedoch dient sie gut zur Veranschauung, was optimal wäre.)
 
-
 Eine ROC Curve stellt für EINE dieser Werte seine entsprechende Kurve dar, wie gut diese klassifiziert werden kann.
-
 
 Wie oben zu sehen ist, wird entsprechend der Importance-Tabelle grafisch ersichtlich, dass "Links" bessere Werte liefern kann, denn die AUC (Area Under the Curve) is grösser, bzw. werden weniger werte falsch eingestuft.
 Wenn die ROC näher an der blauen Ideallinie ist, desto besser konnte es von den Desicion Trees korrekt identifiziert werden.
 
 Dementsprechend ist beim oberen der beiden ROC die Fehlerrate höher, da weniger genau geschätzt werden kann, bzw. weniger Werte korrekt eingeschätzt werden können
+```{r roc}
+plot(roc(testSet$prediction, testSet$laenge), print.auc=TRUE)
+lines(beispielRoc, col="blue")
 
-
-### MeanDecreaseGini
-
-Gini-Wichtigkeit oder mittlere Verringerung der Verunreinigung (MDI) berechnet jede Merkmalsbedeutung als die Summe über die Anzahl von Teilungen (über alle Bäume hinweg), die das Merkmal enthalten, proportional zu der Anzahl von Samples, die es aufteilt.
-Ein kleinerer Gini-Wert bedeutet eine "reinerer/besserer" Ansatz die Daten optimal zu teilen.
-Das MDI Model nimmt immer den besten/reinsten Datensatz
-
-### Variable Importance
-```{r Variable Importance}
-control <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
-data("banknoten") #Fix, damit wieder originale Daten vorkommen
-banknoten.rf <- randomForest(falsch ~ ., data = banknoten, ntree=1000, keep.forest=FALSE, importance=TRUE)
-
-varImp(banknoten.rf)
-
-varImpPlot(banknoten.rf)
+plot(roc(testSet$prediction, testSet$links), print.auc=TRUE)
+lines(beispielRoc, col="blue")
 ```
 
 ## Out-of-Bag Error
-
 Zu Beginn teilt man das Dataset in Trainings-Daten und Test-Daten auf. Mit den Trainings-Daten wird der Algorithmus trainiert. Wird nun der trainierte Algorithmus auf die Test-Daten angewendet, so erhalten wir eine mögliche Fehlerrate bei der Kategorisierung. Diese Fehlerrate nennt man Out-of-Bag Error, und ist eine Schätzung wie genau der Algorithmus ist.
