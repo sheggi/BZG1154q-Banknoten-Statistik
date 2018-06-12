@@ -14,6 +14,8 @@ library(caret)
 library(pROC)
 library(mlbench)
 
+seed = 13
+
 ##In der eigenen Umgebung benötigt man:
 #install.packages("ddalpha")
 #install.packages("ggplot2")
@@ -105,6 +107,8 @@ Deswegen haben wir uns entschieden die "besten" Datensätze zu entfernen, damit 
 ### Wichtigkeit der Variablen (MeanDecreaseGini)
 ```{r MeanDecreaseGini}
 control <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
+
+set.seed(seed)
 banknoten.rf <- randomForest(faktor ~ ., data = banknoten, ntree=1000, keep.forest=FALSE, importance=TRUE)
 
 varImp(banknoten.rf)
@@ -139,15 +143,17 @@ ggplot(banknoten, aes(x=links, colour=faktor, fill=faktor)) +
 ## Erstellung des Training- und Testsets
 Der ganze Bestand wird in die zwei Sets eingeteilt und das Trainingset erhält bereits via RandomForest seine Prädiktion erhalten.
 
-Die zwei Spalten sind nun dmentsprechend mehr Wert als vorhin.
+Die zwei Spalten sind nun dementsprechend mehr Wert als vorhin.
 ```{r raining- and teststet}
-set.seed(13) 
+set.seed(seed) 
 trainIndex <- createDataPartition(banknoten$faktor, p = .6, 
                                   list = FALSE, times = 1)
 
 trainSet <- banknoten[trainIndex, ]
 testSet <- banknoten[-trainIndex,]
 
+set.seed(seed)
+#default training
 model <- randomForest(formula = faktor ~ ., data = banknoten)
 
 testSet$prediction <- predict(model, testSet[,1:3])
@@ -165,6 +171,17 @@ True Negatives durch alle wahren Negativen, die vorhanden sind
 True Positives durch alle wahren Positiven, die vorhanden sind
 ```{r confusion matrix}
 confusionMatrix(testSet$prediction, testSet$faktor)
+```
+
+### Random Forest Tuning
+
+```{r raining- and teststet}
+set.seed(seed)
+model <- randomForest(formula = faktor ~ ., data = banknoten)
+
+testSet$prediction <- predict(model, testSet[,1:3])
+
+importance(model)
 ```
 
 ### ROC Curve
