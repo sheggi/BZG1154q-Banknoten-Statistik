@@ -1,0 +1,15 @@
+Gemäss Link: https://machinelearningmastery.com/tune-machine-learning-algorithms-in-r/
+Unter dem Punkt: Grid Search wurde folgender Code genommen und an unserem Daten angepasst.
+
+
+```{r ttestt}
+control <- trainControl(method="repeatedcv", number=10, repeats=3, search="grid")
+set.seed(13)
+tunegrid <- expand.grid(.mtry=c(1:15))
+rf_gridsearch <- train(faktor ~., data=testSet, method="rf", metric="Accuracy", tuneGrid=tunegrid, trControl=control)
+print(rf_gridsearch)
+plot(rf_gridsearch)
+```
+
+Dies kann zuunterst im knitted eingefügt werden und ein Resultat kommt heraus.
+Leider verstehe ich nicht wie man dies nun einsetzen kann...

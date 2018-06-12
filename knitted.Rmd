@@ -1,7 +1,7 @@
 ---
 title: "Banknoten"
 author: "JoKeYa"
-date: "11/06/2018"
+date: "12/06/2018"
 output: html_document
 ---
 
@@ -203,3 +203,26 @@ lines(beispielRoc, col="blue")
 
 ## Out-of-Bag Error
 Zu Beginn teilt man das Dataset in Trainings-Daten und Test-Daten auf. Mit den Trainings-Daten wird der Algorithmus trainiert. Wird nun der trainierte Algorithmus auf die Test-Daten angewendet, so erhalten wir eine mögliche Fehlerrate bei der Kategorisierung. Diese Fehlerrate nennt man Out-of-Bag Error, und ist eine Schätzung wie genau der Algorithmus ist.
+
+
+## Tuning
+Hier sieht man, dass über das Tuning herauskommt, dass mtry mit Nummer 1 unsere beste Hoffnung ist.
+
+Es wird hier nur ein false Positive "verbessert", jedoch ist es ein kleines Set und somit schon super.
+
+```{r tuning}
+control <- trainControl(method="repeatedcv", number=10, repeats=3, search="grid")
+set.seed(13)
+tunegrid <- expand.grid(.mtry=c(1:3))
+rf_gridsearch <- train(faktor ~., data=testSet, method="rf", metric="Accuracy", tuneGrid=tunegrid, trControl=control)
+print(rf_gridsearch)
+plot(rf_gridsearch)
+
+model <- randomForest(formula = faktor ~ ., data = banknoten, mtry=1)
+testSet$prediction <- predict(model, testSet[,1:3])
+confusionMatrix(testSet$prediction, testSet$faktor)
+
+model <- randomForest(formula = faktor ~ ., data = banknoten, mtry=3)
+testSet$prediction <- predict(model, testSet[,1:3])
+confusionMatrix(testSet$prediction, testSet$faktor)
+```
