@@ -127,14 +127,10 @@ banknoten$oben = NULL
 
 ggplot(banknoten, aes(x=links, colour=faktor, fill=faktor)) +
   geom_density(alpha=.3) +
-  geom_vline(aes(xintercept=mean(links,
-                 colour=faktor)), color="red", size=1) +
-  geom_vline(aes(xintercept=median(links,
-                 colour=faktor)), color="green", size=1) +
-  geom_vline(aes(xintercept=quantile(links, 0.25),
-                 colour=faktor), color="blue", size=1) +
-  geom_vline(aes(xintercept=quantile(links, 0.75),
-                 colour=faktor), color="yellow", size=1) +
+  geom_vline(aes(xintercept=mean(links, colour=faktor)), color="red", size=1) +
+  geom_vline(aes(xintercept=median(links, colour=faktor)), color="green", size=1) +
+  geom_vline(aes(xintercept=quantile(links, 0.25), colour=faktor), color="blue", size=1) +
+  geom_vline(aes(xintercept=quantile(links, 0.75), colour=faktor), color="yellow", size=1) +
   xlab("Links") +  
   ylab("Faktor") +
   theme(legend.position="none")
@@ -153,7 +149,7 @@ trainSet <- banknoten[trainIndex, ]
 testSet <- banknoten[-trainIndex,]
 
 set.seed(seed)
-#default training
+# default training
 model <- randomForest(formula = faktor ~ ., data = banknoten)
 
 testSet$prediction <- predict(model, testSet[,1:3])
@@ -171,17 +167,6 @@ True Negatives durch alle wahren Negativen, die vorhanden sind
 True Positives durch alle wahren Positiven, die vorhanden sind
 ```{r confusion matrix}
 confusionMatrix(testSet$prediction, testSet$faktor)
-```
-
-### Random Forest Tuning
-
-```{r raining- and teststet}
-set.seed(seed)
-model <- randomForest(formula = faktor ~ ., data = banknoten)
-
-testSet$prediction <- predict(model, testSet[,1:3])
-
-importance(model)
 ```
 
 ### ROC Curve
@@ -210,19 +195,63 @@ Hier sieht man, dass über das Tuning herauskommt, dass mtry mit Nummer 1 unsere
 
 Es wird hier nur ein false Positive "verbessert", jedoch ist es ein kleines Set und somit schon super.
 
+Wenn wir nun mit ntree experimentieren, erhalten ein ähnliches Ergebniss. Die Experimente mit importance und proximity ergeben keine Verbesserung.
+
+Fazit: die Default-Werte für den randomForest sind schon sehr gut gewählt für unser Datenset.
+
 ```{r tuning}
+set.seed(seed)
 control <- trainControl(method="repeatedcv", number=10, repeats=3, search="grid")
-set.seed(13)
 tunegrid <- expand.grid(.mtry=c(1:3))
 rf_gridsearch <- train(faktor ~., data=testSet, method="rf", metric="Accuracy", tuneGrid=tunegrid, trControl=control)
 print(rf_gridsearch)
 plot(rf_gridsearch)
 
+
+# 
+set.seed(seed)
 model <- randomForest(formula = faktor ~ ., data = banknoten, mtry=1)
 testSet$prediction <- predict(model, testSet[,1:3])
-confusionMatrix(testSet$prediction, testSet$faktor)
+model
 
+set.seed(seed)
+model <- randomForest(formula = faktor ~ ., data = banknoten, mtry=2)
+testSet$prediction <- predict(model, testSet[,1:3])
+model
+
+set.seed(seed)
 model <- randomForest(formula = faktor ~ ., data = banknoten, mtry=3)
 testSet$prediction <- predict(model, testSet[,1:3])
-confusionMatrix(testSet$prediction, testSet$faktor)
+model
+
+
+set.seed(seed)
+model <- randomForest(formula = faktor ~ ., data = banknoten, ntree=10)
+testSet$prediction <- predict(model, testSet[,1:3])
+model
+
+set.seed(seed)
+model <- randomForest(formula = faktor ~ ., data = banknoten, ntree=100)
+testSet$prediction <- predict(model, testSet[,1:3])
+model
+
+set.seed(seed)
+model <- randomForest(formula = faktor ~ ., data = banknoten, ntree=500)
+testSet$prediction <- predict(model, testSet[,1:3])
+model
+
+set.seed(seed)
+model <- randomForest(formula = faktor ~ ., data = banknoten, ntree=1000)
+testSet$prediction <- predict(model, testSet[,1:3])
+model
+
+set.seed(seed)
+model <- randomForest(formula = faktor ~ ., data = banknoten, ntree=1000, importance=TRUE)
+testSet$prediction <- predict(model, testSet[,1:3])
+model
+
+set.seed(seed)
+model <- randomForest(formula = faktor ~ ., data = banknoten, ntree=1000, proximity=TRUE)
+testSet$prediction <- predict(model, testSet[,1:3])
+model
 ```
