@@ -1,7 +1,7 @@
 ---
 title: "Banknoten"
 author: "JoKeYa"
-date: "12/06/2018"
+date: "19/06/2018"
 output: html_document
 ---
 
@@ -64,14 +64,6 @@ beispielRoc <- roc(banknoten$falsch, banknoten$diagonal)
 str(banknoten)
 
 colMeans(banknoten[,1:7])
-
-median(banknoten$laenge)
-median(banknoten$links)
-median(banknoten$rechts)
-median(banknoten$unten)
-median(banknoten$oben)
-median(banknoten$diagonal)
-median(banknoten$falsch)
 
 quantile(banknoten$diagonal, 0.25)
 ```
